@@ -567,20 +567,45 @@ where
 			.or_else(|| self.block_announce_data_cache.get(&hash).cloned())
 			.unwrap_or_default();
 
-		for (peer_id, ref mut peer) in self.peers.iter_mut() {
-			let inserted = peer.known_blocks.insert(hash);
-			if inserted {
-				log::trace!(target: LOG_TARGET, "Announcing block {hash:?} to {peer_id}");
+		let peer_ids: Vec<_> = self.peers
+			.iter()
+			.filter_map(|(peer_id, peer)| {
+				if !peer.known_blocks.contains(&hash) {
+					Some(*peer_id)
+				} else {
+					None
+				}
+			})
+			.collect();
+
+		if peer_ids.is_empty() {
+			log::debug!(target: LOG_TARGET, "No new peers to announce block {hash:?}. Skipping.");
+			return;
+		}
+
+		log::debug!(target: LOG_TARGET, "Announcing block {hash:?} to {peer_ids:?}");
+
+		let notification_service = self.notification_service.clone();
+		let header = header.clone();
+		let data = data.clone();
+
+		tokio::spawn(async move {
+			tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+			log::debug!(target: LOG_TARGET, "Announcing block {hash:?} after 1-second delay");
+
+			for peer_id in peer_ids {
+				log::trace!(target: LOG_TARGET, "Sending block {hash:?} to peer {peer_id}");
 				let message = BlockAnnounce {
 					header: header.clone(),
-					state: if is_best { Some(BlockState::Best) } else { Some(BlockState::Normal) },
+					state: Some(if is_best { BlockState::Best } else { BlockState::Normal }),
 					data: Some(data.clone()),
 				};
 
-				let _ = self.notification_service.send_sync_notification(peer_id, message.encode());
+				let _ = notification_service.send_sync_notification(&peer_id, message.encode());
 			}
-		}
+		});
 	}
+
 
 	pub async fn run(mut self) {
 		loop {

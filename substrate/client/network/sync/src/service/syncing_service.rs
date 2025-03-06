@@ -215,7 +215,11 @@ impl<B: BlockT> SyncEventStream for SyncingService<B> {
 
 impl<B: BlockT> NetworkBlock<B::Hash, NumberFor<B>> for SyncingService<B> {
 	fn announce_block(&self, hash: B::Hash, data: Option<Vec<u8>>) {
-		let _ = self.tx.unbounded_send(ToServiceCommand::AnnounceBlock(hash, data));
+		let tx = self.tx.clone();
+		tokio::spawn(async move {
+			tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+			let _ = tx.unbounded_send(ToServiceCommand::AnnounceBlock(hash, data));
+		});
 	}
 
 	fn new_best_block_imported(&self, hash: B::Hash, number: NumberFor<B>) {

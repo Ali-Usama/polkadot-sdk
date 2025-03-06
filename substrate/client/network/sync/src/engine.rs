@@ -88,6 +88,7 @@ use std::{
 		Arc,
 	},
 };
+use std::sync::Mutex;
 
 /// Interval at which we perform time based maintenance
 const TICK_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(1100);
@@ -566,51 +567,19 @@ where
 			.or_else(|| self.block_announce_data_cache.get(&hash).cloned())
 			.unwrap_or_default();
 
-		let mut peer_ids: Vec<_> = self.peers.keys().cloned().collect();
-		for (peer_id, peer) in self.peers.iter_mut() {
-			if !peer.known_blocks.insert(hash) {
-				peer_ids.push(*peer_id);
+		for (peer_id, ref mut peer) in self.peers.iter_mut() {
+			let inserted = peer.known_blocks.insert(hash);
+			if inserted {
+				log::trace!(target: LOG_TARGET, "Announcing block {hash:?} to {peer_id}");
+				let message = BlockAnnounce {
+					header: header.clone(),
+					state: if is_best { Some(BlockState::Best) } else { Some(BlockState::Normal) },
+					data: Some(data.clone()),
+				};
+
+				let _ = self.notification_service.send_sync_notification(peer_id, message.encode());
 			}
 		}
-
-		log::debug!(
-			target: "sync",
-			"Announcing block {hash:?} to {peer_ids:?}"
-		);
-		if peer_ids.is_empty() {
-			return;
-		}
-		let mut notification_service = match self.notification_service.clone() {
-			Ok(service) => service,
-			Err(_) => {
-				log::warn!(target: LOG_TARGET, "Failed to clone notification service");
-				return;
-			},
-		};
-		let header = header.clone();
-		let data = data.clone();
-
-		tokio::spawn({
-
-			async move {
-				log::debug!(
-					target: "sync",
-					"Delaying block announcement by 1 second..."
-				);
-				tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-				for peer_id in peer_ids {
-					log::trace!(target: LOG_TARGET, "Announcing block {hash:?} to {peer_id}");
-					let message = BlockAnnounce {
-						header: header.clone(),
-						state: if is_best { Some(BlockState::Best) } else { Some(BlockState::Normal) },
-						data: Some(data.clone()),
-					};
-
-					let _ = notification_service.send_sync_notification(&peer_id, message.encode());
-
-				}
-			}
-		});
 	}
 
 	pub async fn run(mut self) {

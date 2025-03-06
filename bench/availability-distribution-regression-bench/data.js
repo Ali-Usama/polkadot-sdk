@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1741219868392,
+  "lastUpdate": 1741262446845,
   "repoUrl": "https://github.com/paritytech/polkadot-sdk",
   "entries": {
     "availability-distribution-regression-bench": [
@@ -57805,6 +57805,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "bitfield-distribution",
             "value": 0.02379782680666666,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pgherveou@gmail.com",
+            "name": "PG Herveou",
+            "username": "pgherveou"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cbc0faa4ecff7fb184bb0bb4de85b2db12e2d123",
+          "message": "[pallet-revive] eth-rpc-tester quick fixes (#7818)\n\nSmall tweaks to the eth-rpc-tester bin\n\n---------\n\nCo-authored-by: cmd[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+          "timestamp": "2025-03-06T10:57:22Z",
+          "tree_id": "4b9e3302989edd2fc55ba592bf333ecc2c02cb67",
+          "url": "https://github.com/paritytech/polkadot-sdk/commit/cbc0faa4ecff7fb184bb0bb4de85b2db12e2d123"
+        },
+        "date": 1741262429686,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Received from peers",
+            "value": 433.3333333333332,
+            "unit": "KiB"
+          },
+          {
+            "name": "Sent to peers",
+            "value": 18481.666666666653,
+            "unit": "KiB"
+          },
+          {
+            "name": "availability-distribution",
+            "value": 0.012490732833333334,
+            "unit": "seconds"
+          },
+          {
+            "name": "bitfield-distribution",
+            "value": 0.023805808859999996,
+            "unit": "seconds"
+          },
+          {
+            "name": "availability-store",
+            "value": 0.15426042118000002,
+            "unit": "seconds"
+          },
+          {
+            "name": "test-environment",
+            "value": 0.008601161553333398,
             "unit": "seconds"
           }
         ]

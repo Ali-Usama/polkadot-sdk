@@ -217,7 +217,8 @@ impl<B: BlockT> NetworkBlock<B::Hash, NumberFor<B>> for SyncingService<B> {
 	fn announce_block(&self, hash: B::Hash, data: Option<Vec<u8>>) {
 		let tx = self.tx.clone();
 		tokio::spawn(async move {
-			tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+			/// Sleep for 5 seconds to test the block announcement.
+			tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 			let _ = tx.unbounded_send(ToServiceCommand::AnnounceBlock(hash, data));
 		});
 	}

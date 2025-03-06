@@ -568,14 +568,25 @@ where
 
 		let mut peer_ids: Vec<_> = self.peers.keys().cloned().collect();
 		for (peer_id, peer) in self.peers.iter_mut() {
-			let inserted = peer.known_blocks.insert(hash);
-			if inserted {
+			if !peer.known_blocks.insert(hash) {
 				peer_ids.push(*peer_id);
 			}
 		}
-		let mut notification_service = self.notification_service
-			.clone()
-			.expect("Notification service is not available");
+
+		log::debug!(
+			target: "sync",
+			"Announcing block {hash:?} to {peer_ids:?}"
+		);
+		if peer_ids.is_empty() {
+			return;
+		}
+		let mut notification_service = match self.notification_service.clone() {
+			Ok(service) => service,
+			Err(_) => {
+				log::warn!(target: LOG_TARGET, "Failed to clone notification service");
+				return;
+			},
+		};
 		let header = header.clone();
 		let data = data.clone();
 

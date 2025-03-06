@@ -585,7 +585,7 @@ where
 
 		log::debug!(target: LOG_TARGET, "Announcing block {hash:?} to {peer_ids:?}");
 
-		let notification_service = self.notification_service.clone();
+		let mut notification_service = self.notification_service.clone().unwrap();
 		let header = header.clone();
 		let data = data.clone();
 

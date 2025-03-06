@@ -58,6 +58,10 @@ impl<T: Hash + Eq> LruHashSet<T> {
 		}
 		false
 	}
+
+	pub fn contains(&self, e: &T) -> bool {
+		self.set.contains(e)
+	}
 }
 
 #[cfg(test)]

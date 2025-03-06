@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1741219918357,
+  "lastUpdate": 1741262496318,
   "repoUrl": "https://github.com/paritytech/polkadot-sdk",
   "entries": {
     "statement-distribution-regression-bench": [
@@ -37175,6 +37175,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "statement-distribution",
             "value": 0.03508629630599999,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pgherveou@gmail.com",
+            "name": "PG Herveou",
+            "username": "pgherveou"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cbc0faa4ecff7fb184bb0bb4de85b2db12e2d123",
+          "message": "[pallet-revive] eth-rpc-tester quick fixes (#7818)\n\nSmall tweaks to the eth-rpc-tester bin\n\n---------\n\nCo-authored-by: cmd[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+          "timestamp": "2025-03-06T10:57:22Z",
+          "tree_id": "4b9e3302989edd2fc55ba592bf333ecc2c02cb67",
+          "url": "https://github.com/paritytech/polkadot-sdk/commit/cbc0faa4ecff7fb184bb0bb4de85b2db12e2d123"
+        },
+        "date": 1741262478966,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Received from peers",
+            "value": 106.39999999999996,
+            "unit": "KiB"
+          },
+          {
+            "name": "Sent to peers",
+            "value": 127.97199999999995,
+            "unit": "KiB"
+          },
+          {
+            "name": "statement-distribution",
+            "value": 0.035531890422000015,
+            "unit": "seconds"
+          },
+          {
+            "name": "test-environment",
+            "value": 0.045115668537999955,
             "unit": "seconds"
           }
         ]

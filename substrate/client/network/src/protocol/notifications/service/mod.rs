@@ -42,6 +42,9 @@ use tokio_stream::wrappers::ReceiverStream;
 use sc_utils::mpsc::{tracing_unbounded, TracingUnboundedReceiver, TracingUnboundedSender};
 
 use std::{collections::HashMap, fmt::Debug, sync::Arc};
+use codec::Decode;
+use sc_network_common::sync::message::BlockAnnounce;
+use sp_runtime::generic::Block;
 
 pub(crate) mod metrics;
 
@@ -220,6 +223,10 @@ impl NotificationHandle {
 	}
 }
 
+fn is_block_announcement(notification: &[u8]) -> bool {
+	BlockAnnounce::<sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>>::decode(&mut &notification[..]).is_ok()
+}
+
 #[async_trait::async_trait]
 impl NotificationService for NotificationHandle {
 	/// Instruct `Notifications` to open a new substream for `peer`.
@@ -235,13 +242,28 @@ impl NotificationService for NotificationHandle {
 	/// Send synchronous `notification` to `peer`.
 	fn send_sync_notification(&mut self, peer: &sc_network_types::PeerId, notification: Vec<u8>) {
 		if let Some(info) = self.peers.get(&((*peer).into())) {
-			metrics::register_notification_sent(
-				info.sink.metrics(),
-				&self.protocol,
-				notification.len(),
-			);
+			let notification = notification.clone();
+			let sink = info.sink.clone();
+			let protocol = self.protocol.clone();
 
-			let _ = info.sink.send_sync_notification(notification);
+			if is_block_announcement(&notification) {
+				log::debug!(
+					target: "sync",
+					"Delaying block announcement by 1 second..."
+				);
+				tokio::spawn(async move {
+					tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+					metrics::register_notification_sent(sink.metrics(), &protocol, notification.len());
+					sink.send_sync_notification(notification);
+				});
+			} else {
+				log::debug!(
+					target: "sync",
+					"Sending block announcement immediately...",
+				);
+				metrics::register_notification_sent(sink.metrics(), &protocol, notification.len());
+				sink.send_sync_notification(notification);
+			}
 		}
 	}
 

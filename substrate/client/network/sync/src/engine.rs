@@ -601,7 +601,11 @@ where
 					data: Some(data.clone()),
 				};
 
-				let _ = notification_service.send_sync_notification(&peer_id, message.encode());
+
+				if let Err(e) = notification_service.send_async_notification(&peer_id, message.encode()).await {
+					log::warn!(target: LOG_TARGET, "Failed to send async notification to {peer_id}: {e}");
+				}
+
 			}
 		});
 	}

@@ -257,10 +257,6 @@ impl NotificationService for NotificationHandle {
 					sink.send_sync_notification(notification);
 				});
 			} else {
-				log::debug!(
-					target: "sync",
-					"Sending block announcement immediately...",
-				);
 				metrics::register_notification_sent(sink.metrics(), &protocol, notification.len());
 				sink.send_sync_notification(notification);
 			}
